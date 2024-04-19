@@ -53,7 +53,9 @@ public class Personne extends AbstractModel<Long>{
     @Column(name = "added_date", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP", insertable = false, updatable = false)
     private Date addedDate;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+
+
+    @ManyToOne
     @JoinColumn(name="NATIONALITE_ID")
     private Nationalite nationalite;
 

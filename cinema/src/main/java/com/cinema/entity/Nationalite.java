@@ -1,6 +1,8 @@
 package com.cinema.entity;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -26,8 +28,7 @@ public class Nationalite extends AbstractModel<Long> {
     private String libelle;
 
     @OneToMany(mappedBy = "nationalite")
-    @JsonIgnore
-    private List<Personne> personnes;
+    private Set<Personne> personnes = new HashSet<>();
 
     public String toString() {
         return this.libelle;
