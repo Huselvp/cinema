@@ -1,101 +1,78 @@
 package com.cinema.entity;
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-@Data
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-public class Film {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private Date addedDate;
-    private int annee;
-    private int duree;
+public class Film extends AbstractModel<Long>{
+
+    private static final long serialVersionUID = 2996009286487492970L;
+
+    @Column(nullable = false, length = 50)
     private String titre;
-    @ManyToMany(mappedBy = "films")
-    private Set<Personne> artistes = new HashSet<>();
 
-    @ManyToOne
-    private Personne directeur;
+    @Column(nullable = false)
+    private int duree;
 
-    public Film(Date addedDate, int annee, int duree, String titre) {
-        this.addedDate = addedDate;
-        this.annee = annee;
-        this.duree = duree;
-        this.titre = titre;
-    }
-    public Long getId() {
-        return id;
-    }
+    @Column(nullable = false)
+    private int annee;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name="GENRE_ID")
+    private Genre genre;
 
-    public Date getAddedDate() {
-        return addedDate;
-    }
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name="NATIONALITE_ID")
+    @JsonProperty
+    private Nationalite nationalite;
 
-    public void setAddedDate(Date addedDate) {
-        this.addedDate = addedDate;
-    }
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name="DIRECTOR_ID")
+    private Personne realisateur;
 
-    public int getAnnee() {
-        return annee;
-    }
+    @ManyToMany
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @JoinTable(
+            name="FILM_ACTEUR",
+            joinColumns=@JoinColumn(name="FILM_ID", referencedColumnName="ID"),
+            inverseJoinColumns=@JoinColumn(name="ACTEUR_ID", referencedColumnName="ID"))
+    private List<Personne> acteurs;
 
-    public void setAnnee(int annee) {
-        this.annee = annee;
-    }
+    @OneToMany(mappedBy = "film")
+    @JsonIgnore
+    private List<Seance> seances;
 
-    public int getDuree() {
-        return duree;
-    }
+    @OneToMany(mappedBy = "film", cascade = {CascadeType.ALL})
+    @JsonIgnore
+    @LazyCollection(LazyCollectionOption.FALSE)
+    private List<Media> medias;
 
-    public void setDuree(int duree) {
-        this.duree = duree;
-    }
-
-    public String getTitre() {
-        return titre;
-    }
-
-    public void setTitre(String titre) {
-        this.titre = titre;
-    }
-    public Set<Personne> getArtistes() {
-        return artistes;
-    }
-
-    public void setArtistes(Set<Personne> artistes) {
-        this.artistes = artistes;
-    }
-
-    public Personne getDirecteur() {
-        return directeur;
-    }
-
-    public void setDirecteur(Personne directeur) {
-        this.directeur = directeur;
-    }
-
-
-
-    @Override
-    public String toString() {
-        return "Film{" +
-                "id=" + id +
-                ", addedDate=" + addedDate +
-                ", annee=" + annee +
-                ", duree=" + duree +
-                ", titre='" + titre + '\'' +
-                '}';
-    }
+    @Column(name = "added_date", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP", insertable = false, updatable = false)
+    private Date addedDate;
 }
+

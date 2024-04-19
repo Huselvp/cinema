@@ -1,128 +1,72 @@
 package com.cinema.entity;
 
-import jakarta.persistence.*;
+import java.util.Date;
+import java.util.List;
 
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+
+import org.springframework.format.annotation.DateTimeFormat;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-public class Personne {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class Personne extends AbstractModel<Long>{
 
-    private LocalDateTime addedDate;
-    private LocalDateTime dateDeNaissance;
+    private static final long serialVersionUID = -2974953413266908441L;
+
+    public enum TypePersonne {ACTEUR, REALISATEUR}
+
+    @Column(nullable = false, length = 50)
     private String nom;
+
+    @Column(nullable = false, length = 50)
     private String prenom;
+
+    @Column(nullable = true, length = 100)
     private String photo;
 
+    @Column(name = "date_naissance")
+    @DateTimeFormat(pattern="yyyy-MM-dd")
+    private Date dateNaissance;
+
+    @Column(nullable = false, length = 50)
     @Enumerated(EnumType.STRING)
     private TypePersonne typePersonne;
-    @ManyToMany
-    @JoinTable(
-            name = "film_personne",
-            joinColumns = @JoinColumn(name = "personne_id"),
-            inverseJoinColumns = @JoinColumn(name = "film_id")
-    )
-    private Set<Film> films = new HashSet<>();
 
-    public enum TypePersonne {
-        DIRECTOR,
-        ARTIST
-    }
+    @Column(name = "added_date", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP", insertable = false, updatable = false)
+    private Date addedDate;
 
-    // Constructors, getters, and setters
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name="NATIONALITE_ID")
+    private Nationalite nationalite;
 
-    public Personne() {
-    }
+    @ManyToMany(mappedBy="acteurs", fetch = FetchType.EAGER)
+    @JsonIgnore
+    private List<Film> films;
 
-    public Personne(LocalDateTime addedDate, LocalDateTime dateDeNaissance, String nom, String prenom, String photo, TypePersonne typePersonne) {
-        this.addedDate = addedDate;
-        this.dateDeNaissance = dateDeNaissance;
-        this.nom = nom;
-        this.prenom = prenom;
-        this.photo = photo;
-        this.typePersonne = typePersonne;
-    }
+    @OneToMany(mappedBy = "realisateur", fetch = FetchType.EAGER)
+    @JsonIgnore
+    private List<Film> filmsRealises;
 
-    // Getters and setters
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public LocalDateTime getAddedDate() {
-        return addedDate;
-    }
-
-    public void setAddedDate(LocalDateTime addedDate) {
-        this.addedDate = addedDate;
-    }
-
-    public LocalDateTime getDateDeNaissance() {
-        return dateDeNaissance;
-    }
-
-    public void setDateDeNaissance(LocalDateTime dateDeNaissance) {
-        this.dateDeNaissance = dateDeNaissance;
-    }
-
-    public String getNom() {
-        return nom;
-    }
-
-    public void setNom(String nom) {
-        this.nom = nom;
-    }
-
-    public String getPrenom() {
-        return prenom;
-    }
-
-    public void setPrenom(String prenom) {
-        this.prenom = prenom;
-    }
-
-    public String getPhoto() {
-        return photo;
-    }
-
-    public void setPhoto(String photo) {
-        this.photo = photo;
-    }
-
-    public TypePersonne getTypePersonne() {
-        return typePersonne;
-    }
-
-    public void setTypePersonne(TypePersonne typePersonne) {
-        this.typePersonne = typePersonne;
-    }
-
-    public Set<Film> getFilms() {
-        return films;
-    }
-
-    public void setFilms(Set<Film> films) {
-        this.films = films;
-    }
-
-    @Override
     public String toString() {
-        return "Personne{" +
-                "id=" + id +
-                ", addedDate=" + addedDate +
-                ", dateDeNaissance=" + dateDeNaissance +
-                ", nom='" + nom + '\'' +
-                ", prenom='" + prenom + '\'' +
-                ", photo='" + photo + '\'' +
-                ", typePersonne=" + typePersonne +
-                '}';
+        return this.prenom + " " + this.nom;
     }
 }
